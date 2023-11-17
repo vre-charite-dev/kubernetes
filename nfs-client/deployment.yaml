@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner-vre
+  labels:
+    app: nfs-client-provisioner-vre
+  namespace: nfs-client
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner-vre
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner-vre
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner-vre
+          image: s-hdp-vre-v007.charite.de/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: nfs-provisioner-vre
+            - name: NFS_SERVER
+              value: bihnas2.charite.de
+            - name: NFS_PATH
+              value: /AG-Ritter-VRE/VRE-namespace
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: bihnas2.charite.de
+            path: /AG-Ritter-VRE/VRE-namespace
+      nodeSelector:
+        namespace: vre
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner-utility
+  labels:
+    app: nfs-client-provisioner-utility
+  namespace: nfs-client
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner-utility
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner-utility
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner-utility
+          image: s-hdp-vre-v007.charite.de/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: nfs-provisioner-utility
+            - name: NFS_SERVER
+              value: bihnas2.charite.de
+            - name: NFS_PATH
+              value: /AG-Ritter-VRE/Utility-namespace
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: bihnas2.charite.de
+            path: /AG-Ritter-VRE/Utility-namespace
+      nodeSelector:
+        namespace: utility
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner-greenroom
+  labels:
+    app: nfs-client-provisioner-greenroom
+  namespace: nfs-client
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner-greenroom
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner-greenroom
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner-greenroom
+          image: s-hdp-vre-v007.charite.de/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: nfs-provisioner-greenroom
+            - name: NFS_SERVER
+              value: bihnas2.charite.de
+            - name: NFS_PATH
+              value: /AG-Ritter-VRE/Greenroom-namespace
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: bihnas2.charite.de
+            path: /AG-Ritter-VRE/Greenroom-namespace
+      nodeSelector:
+        namespace: greenroom
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nfs-client-provisioner-minio
+  labels:
+    app: nfs-client-provisioner-minio
+  namespace: nfs-client
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nfs-client-provisioner-minio
+  template:
+    metadata:
+      labels:
+        app: nfs-client-provisioner-minio
+    spec:
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner-minio
+          image: s-hdp-vre-v007.charite.de/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: nfs-provisioner-minio
+            - name: NFS_SERVER
+              value: bihnas2.charite.de
+            - name: NFS_PATH
+              value: /AG-Ritter-VRE/Minio-namespace
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: bihnas2.charite.de
+            path: /AG-Ritter-VRE/Minio-namespace
+      nodeSelector:
+        namespace: minio

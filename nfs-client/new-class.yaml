@@ -1,0 +1,37 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: new-managed-nfs-storage-vre
+provisioner: new-nfs-provisioner-vre
+parameters:
+  archiveOnDelete: "false"
+allowVolumeExpansion: true
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: new-managed-nfs-storage-utility
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: new-nfs-provisioner-utility
+parameters:
+  archiveOnDelete: "false"
+allowVolumeExpansion: true
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: new-managed-nfs-storage-greenroom
+provisioner: new-nfs-provisioner-greenroom
+parameters:
+  archiveOnDelete: "false"
+allowVolumeExpansion: true
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: new-managed-nfs-storage-minio
+provisioner: new-nfs-provisioner-minio
+parameters:
+  archiveOnDelete: "false"
+allowVolumeExpansion: true
