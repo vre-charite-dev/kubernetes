@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    meta.helm.sh/release-name: opsdb
+    meta.helm.sh/release-namespace: utility
+    volume.beta.kubernetes.io/storage-provisioner: new-nfs-provisioner-utility
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: opsdb-database-backup-pvc
+  namespace: utility
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
+  volumeName: new-opsdb-database-backup-pvc-pv

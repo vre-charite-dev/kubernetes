@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opsdb
+  namespace: utility
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opsdb
+  serviceName: opsdb
+  template:
+    metadata:
+      labels:
+        app: opsdb
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: INDOC_VRE
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: opsdb
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opsdb
+              key: password
+        image: s-hdp-vre-v007.charite.de/postgres:9.5
+        name: postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: datadir
+          subPath: pgdata
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "2"
+          limits:
+            memory: "8Gi"
+            cpu: "2"
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        namespace: utility
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+      annotations:
+        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opsdb
+  namespace: utility
+  labels:
+    app: opsdb
+spec:
+  ports:
+  - name: pgql
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+    nodePort:
+  selector:
+    app: opsdb
+  type: ClusterIP
