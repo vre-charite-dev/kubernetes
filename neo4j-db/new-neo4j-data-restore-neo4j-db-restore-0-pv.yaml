@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: new-nfs-provisioner-utility
+  name: new-neo4j-data-restore-neo4j-db-restore-0-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  nfs:
+    path: /AG-Ritter-VRE-Utility-namespace/utility-neo4j-data-restore-neo4j-db-restore-0-pvc-41d8d2b3-393a-4784-ac9a-8d72b9ec406a
+    server: bihnas2.charite.de
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
