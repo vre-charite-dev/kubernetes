@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: konga
+  namespace: utility
+  labels:
+    app: konga
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: konga
+  template:
+    metadata:
+      labels:
+        app: konga
+    spec:
+      containers:
+      - name: konga
+        image: s-hdp-vre-v007.charite.de/konga:latest
+        env:
+        - name: TOKEN_SECRET
+          value: $SECRET
+        - name: DB_ADAPTER
+          value: postgres
+        - name: DB_URI
+          value: postgresql://kong:kong@postgres.utility:5432/konga
+        - name: env
+          value: "charite"
+        ports:
+        - containerPort: 1337
+        readinessProbe:
+          tcpSocket:
+            port: 1337
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+      nodeSelector:
+        namespace: utility
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: konga-svc
+  namespace: utility
+spec:
+  selector:
+    app: konga
+  type: LoadBalancer
+  ports:
+  - name: kong-proxy
+    port: 1337
+    targetPort: 1337
+    protocol: TCP
+  selector:
+    app: konga
