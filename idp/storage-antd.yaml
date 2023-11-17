@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: utility
+  name: keycloak-antd
+  annotations:
+    volume.beta.kubernetes.io/storage-class: managed-nfs-storage-utility
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+     requests:
+       storage: 3Gi
