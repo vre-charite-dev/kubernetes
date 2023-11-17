@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: greenroom
+  name: greenroom-storage
+  annotations:
+    volume.beta.kubernetes.io/storage-class: managed-nfs-storage-greenroom
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+     requests:
+       storage: 50Ti
