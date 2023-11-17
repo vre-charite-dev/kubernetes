@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: new-nfs-provisioner-utility
+  labels:
+    app: redis
+    component: master
+    heritage: Tiller
+    release: redis
+    role: master
+  name: redis-data-redis-master-0
+  namespace: utility
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
+  volumeName: new-redis-data-redis-master-0-pv

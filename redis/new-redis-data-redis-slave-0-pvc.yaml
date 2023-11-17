@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: new-nfs-provisioner-utility
+  labels:
+    app: redis
+    component: slave
+    heritage: Tiller
+    release: redis
+    role: slave
+  name: redis-data-redis-slave-0
+  namespace: utility
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
+  volumeName: new-redis-data-redis-slave-0-pv
