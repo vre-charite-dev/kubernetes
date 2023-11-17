@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: new-nfs-provisioner-minio
+  name: new-minio-data-3-minio-0-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 5T
+  nfs:
+    path: /AG-Ritter-VRE-Minio-namespace/minio-minio-data-3-minio-0-pvc-f104b85f-1601-41d1-9f3f-57b66d29b99b
+    server: bihnas2.charite.de
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: new-managed-nfs-storage-minio
+  volumeMode: Filesystem

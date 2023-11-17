@@ -1,0 +1,27 @@
+root:    disabled  # We disable the root identity since we don't need it in this guide
+
+tls:
+  key:  /var/lib/docker/server.key
+  cert: /var/lib/docker/server.cert
+
+policy:
+  MinIO:
+    paths:
+    - /v1/key/create/my-minio-key
+    - /v1/key/generate/my-minio-key
+    - /v1/key/decrypt/my-minio-key
+    identities: # from step 2&3
+    - c69566f58f6ab5911b1837ad91d3110ccd680f6214d6d3314be6d53e2620a047
+    - 78079146eb0de37fe4e88009db3def1be4abb4a4967385679114c5b4d170864f
+
+keystore:
+  vault:
+    endpoint: https://vault.vault:8200
+    approle:
+      id:     "297b541f-f3fc-bc91-ce67-ea993d74f5b4" # from vault config step 5
+      secret: "54ff522f-0b3e-ed8c-65ea-0e2c534f0740" # from vault config step 5
+      retry:  15s
+    status:
+      ping: 10s
+    tls:
+      ca: /var/lib/docker/vault.crt # Since we use self-signed certificates

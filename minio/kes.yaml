@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kes
+  namespace: minio
+spec:
+  ports:
+  - port: 7373
+    protocol: TCP
+    targetPort: 7373
+    name: "7373"
+    nodePort:
+  selector:
+    app: kes
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kes
+  namespace: minio
+  labels:
+    app: kes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kes
+  template:
+    metadata:
+      labels:
+        app: kes
+    spec:
+      containers:
+      - name: kes
+        image: minio/kes:v0.17.2
+        command: ["/kes"]
+        args: ["server", "--config=/var/lib/docker/kes-config.yml", "--auth=off"]
+        ports:
+        - containerPort: 7373
+        volumeMounts:
+#        - name: server-cert
+#          readOnly: true
+#          mountPath: "/var/lib/docker/server.cert"
+#        - name: server-key
+#          readOnly: true
+#          mountPath: "/var/lib/docker/server.key"
+#        - name: vault-crt
+#          readOnly: true
+#          mountPath: "/var/lib/docker/vault.crt"
+        - mountPath: /var/lib/docker/server.cert
+          subPath: server.cert
+          name: server-cert
+        - mountPath: /var/lib/docker/server.key
+          subPath: server.key
+          name: server-key
+        - mountPath: /var/lib/docker/vault.crt
+          subPath: vault.crt
+          name: vault-crt
+        - mountPath: /var/lib/docker/kes-config.yml
+          subPath: kes-config.yml
+          name: kes-config
+#        - name: kes-config
+#          readOnly: true
+#          mountPath: "/var/lib/docker/kes-config.yml"
+      nodeSelector:
+        namespace: minio
+      volumes:
+#      - name: server-cert
+#        secret:
+#          secretName: server.cert.kes
+#      - name: server-key
+#        secret:
+#          secretName: server.key.kes
+#      - name: vault-crt
+#        secret:
+#          secretName: vault.crt
+#      - name: kes-config
+#        configMap:
+#          name: kes-config
+#          items:
+#          - key: kes-config.yml
+#            path: kes-config.yml
+#      - name: kes-config
+#        secret:
+#          secretName: kes-config
+      volumes:
+      - name: server-cert
+        configMap:
+          name: server.cert.kes
+          items:
+          - key: server.cert
+            path: server.cert
+      - name: server-key
+        configMap:
+          name: server.key.kes
+          items:
+          - key: server.key
+            path: server.key
+      - name: vault-crt
+        configMap:
+          name: vault.crt
+          items:
+          - key: vault.crt
+            path: vault.crt
+      - name: kes-config
+        configMap:
+          name: kes-config
+          items:
+          - key: kes-config.yml
+            path: kes-config.yml
