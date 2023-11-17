@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd
+  namespace: vre-project-indoctestproject
+  labels:
+    app: guacd
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4822
+      targetPort: 4822
+      protocol: TCP
+  selector:
+    app: guacd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guacd
+  namespace: vre-project-indoctestproject
+  labels:
+    app: guacd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guacd
+  template:
+    metadata:
+      labels:
+        app: guacd
+    spec:
+      containers:
+        - name: guacd
+          image: "s-hdp-vre-v007.charite.de/guacd:1.0.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: guacd
+              containerPort: 4822
+              protocol: TCP
+      nodeSelector:
+        namespace: vre-project-indoctestproject

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+    volume.beta.kubernetes.io/storage-provisioner: new-nfs-provisioner-utility
+  labels:
+    app: postgres-guacamole
+  name: datadir-postgres-guacamole-0
+  namespace: vre-project-indoctestproject
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+  volumeName: new-datadir-postgres-guacamole-0-pv

@@ -1,0 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: guacamole-extensions
+  namespace: vre-project-indoctestproject
+  labels:
+    app: guacamole
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
+  storageClassName: "managed-nfs-storage-utility"

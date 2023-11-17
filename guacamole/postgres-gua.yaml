@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-guacamole
+  namespace: vre-project-indoctestproject
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-guacamole
+  serviceName: postgres-guacamole
+  template:
+    metadata:
+      labels:
+        app: postgres-guacamole
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: guacamole-postgres
+              key: password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: s-hdp-vre-v007.charite.de/postgres:9.5
+        name: postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: datadir
+          subPath: pgdata
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        namespace: vre-project-indoctestproject
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+      annotations:
+        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-guacamole
+  namespace: vre-project-indoctestproject
+  labels:
+    app: postgres-guacamole
+spec:
+  ports:
+  - name: pgql
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+    nodePort:
+  selector:
+    app: postgres-guacamole
+  type: ClusterIP

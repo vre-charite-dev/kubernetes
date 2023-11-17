@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-configuration
+  namespace: vre-project-indoctestproject
+data:
+  guacamole.properties: |-
+    enable-environment-properties: true
+    postgresql-auto-create-accounts: true
+    guacd-hostname: guacd.vre-project-indoctestproject
+    guacd-port: 4822
+    postgresql-username: guacamole_user
+    postgresql-database: guacamole_db
+    postgresql-hostname: postgres-guacamole.vre-project-indoctestproject
+    postgresql-port: 5432
+    postgresql-absolute-max-connections: 100
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacamole
+  namespace: vre-project-indoctestproject
+  labels:
+    app: guacamole
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+      nodePort:
+  selector:
+    app: guacamole
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guacamole
+  namespace: vre-project-indoctestproject
+  labels:
+    app: guacamole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guacamole
+  template:
+    metadata:
+      labels:
+        app: guacamole
+    spec:
+      nodeSelector:
+        namespace: vre-project-indoctestproject
+      containers:
+        - name: guacamole
+          image: "s-hdp-vre-v007.charite.de/guacamole:1.2.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GUACD_HOSTNAME
+              value: "guacd.vre-project-indoctestproject"
+            - name: GUACD_PORT
+              value: "4822"
+            - name: GUACAMOLE_HOME
+              value: "/etc/guacamole"
+            - name: POSTGRES_HOSTNAME
+              value: "postgres-guacamole.vre-project-indoctestproject"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DATABASE
+              value: "guacamole_db"
+            - name: POSTGRES_USER
+              value: "guacamole_user"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: guacamole-user
+                  key: password
+            - name: POSTGRES_ABSOLUTE_MAX_CONNECTIONS
+              value: "100"
+            - name: MOD_PROXY_WSTUNNEL
+              value: "true"
+            - name: OPENID_AUTHORIZATION_ENDPOINT
+              value: "https://vre.charite.de/vre/auth/realms/vre/protocol/openid-connect/auth"
+            - name: OPENID_JWKS_ENDPOINT
+              value: "http://keycloak.utility:8080/vre/auth/realms/vre/protocol/openid-connect/certs"
+            - name: OPENID_ISSUER
+              value: "https://vre.charite.de/vre/auth/realms/vre"
+            - name: OPENID_CLIENT_ID
+              value: "guacamole-indoctestproject"
+            - name: OPENID_REDIRECT_URI
+              value: "https://vre.charite.de/workbench/indoctestproject/guacamole/"
+            - name: OPENID_USERNAME_CLAIM_TYPE
+              value: "username"
+            - name: OPENID_SCOPE
+              value: "openid username email profile"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          volumeMounts:
+            - name: configurations
+              mountPath: /etc/guacamole/
+            - name: extensions
+              mountPath: /etc/guacamole/extensions
+      volumes:
+        - name: configurations
+          configMap:
+            name: guacamole-configuration
+        - name: extensions
+          persistentVolumeClaim:
+            claimName: guacamole-extensions
