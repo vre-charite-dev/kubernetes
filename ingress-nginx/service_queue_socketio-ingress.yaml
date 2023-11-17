@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: socketio-ingress
+  namespace: greenroom
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/add-base-url: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
+spec:
+  rules:
+  - host:
+    http:
+      paths:
+      - path: /socket.io/
+        backend:
+          serviceName: queue-socketio
+          servicePort: 6062

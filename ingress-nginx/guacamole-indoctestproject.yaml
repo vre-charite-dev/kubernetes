@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: guacamole-ingress
+  namespace: vre-project-indoctestproject
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "512k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+spec:
+  rules:
+  - host:
+    http:
+      paths:
+      - path: /workbench/indoctestproject/(guacamole(/|$).*)
+        backend:
+          serviceName: guacamole
+          servicePort: 8080
