@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: new-nfs-provisioner-utility
+  labels:
+    app: consul
+    chart: consul-helm
+    component: server
+    hasDNS: "true"
+    release: consul
+  name: data-vault-consul-consul-server-0
+  namespace: vault
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
+  volumeName: new-data-vault-consul-consul-server-0-pv

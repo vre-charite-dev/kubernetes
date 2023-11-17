@@ -1,0 +1,15 @@
+global:
+  image: "s-hdp-vre-v007.charite.de/consul:1.8.2"
+
+client:
+  enabled: true
+  nodeSelector: |
+    namespace: utility
+
+server:
+  replicas: 1
+  bootstrapExpect: 1
+  disruptionBudget:
+    maxUnavailable: 0
+  nodeSelector: |
+    namespace: utility
