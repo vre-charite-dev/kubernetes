@@ -674,7 +674,7 @@ spec:
         - name: KONG_PG_HOST
           value: postgres
         - name: KONG_PG_PASSWORD
-          value: $PASSWORD
+          value: postgres
         - name: KONG_NGINX_WORKER_PROCESSES
           value: "1"
         - name: KONG_ADMIN_ACCESS_LOG
@@ -683,7 +683,7 @@ spec:
           value: /dev/stderr
         - name: KONG_PROXY_ERROR_LOG
           value: /dev/stderr
-        image: s-hdp-vre-v007.charite.de/kong-with-oidc
+        image: ghcr.io/vre-charite/kongwithoidc:2.1.0
         lifecycle:
           preStop:
             exec:
@@ -735,8 +735,6 @@ spec:
           limits:
             memory: "4Gi"
             cpu: "2"
-      nodeSelector:
-        namespace: utility
       imagePullSecrets:
       - name: registrypullsecret-tls
       - env:
@@ -793,8 +791,8 @@ spec:
         - name: KONG_PG_HOST
           value: postgres
         - name: KONG_PG_PASSWORD
-          value: PASSWORD
-        image: s-hdp-vre-v007.charite.de/kong-with-oidc
+          value: postgres
+        image: ghcr.io/vre-charite/kongwithoidc:2.1.0
         name: wait-for-migrations
       imagePullSecrets:
       - name: registrypullsecret-tls
@@ -819,14 +817,14 @@ spec:
       containers:
       - env:
         - name: POSTGRES_USER
-          value: $USER
+          value: kong
         - name: POSTGRES_PASSWORD
-          value: $PASSWORD
+          value: postgres
         - name: POSTGRES_DB
           value: kong
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
-        image: s-hdp-vre-v007.charite.de/postgres:9.5
+        image: postgres:9.5
         name: postgres
         ports:
         - containerPort: 5432
@@ -835,13 +833,11 @@ spec:
           name: datadir
           subPath: pgdata
       terminationGracePeriodSeconds: 60
-      nodeSelector:
-        namespace: utility
   volumeClaimTemplates:
   - metadata:
       name: datadir
       annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+        volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
       accessModes:
       - ReadWriteOnce
@@ -866,15 +862,14 @@ spec:
         - kong migrations bootstrap
         env:
         - name: KONG_PG_PASSWORD
-          value: $PASSWORD
-        - name: KONG_PG_HOST
           value: postgres
+        - name: KONG_PG_HOST
+          value: postgres.utility
         - name: KONG_PG_PORT
           value: "5432"
-        image: s-hdp-vre-v007.charite.de/kong-with-oidc
+        image: ghcr.io/vre-charite/kongwithoidc:2.1.0
+        imagePullPolicy: IfNotPresent
         name: kong-migrations
-      imagePullSecrets:
-      - name: registrypullsecret-tls
       initContainers:
       - command:
         - /bin/sh
@@ -886,6 +881,6 @@ spec:
           value: postgres
         - name: KONG_PG_PORT
           value: "5432"
-        image: s-hdp-vre-v007.charite.de/busybox:latest
+        image: busybox:latest
         name: wait-for-postgres
       restartPolicy: OnFailure

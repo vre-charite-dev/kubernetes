@@ -21,16 +21,10 @@ spec:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: opsdb
-              key: username
+          value: postgres
         - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: opsdb
-              key: password
-        image: s-hdp-vre-v007.charite.de/postgres:9.5
+          value: postgres
+        image: postgres:9.5
         name: postgres
         ports:
         - containerPort: 5432
@@ -45,19 +39,17 @@ spec:
           periodSeconds: 10
         resources:
           requests:
-            memory: "8Gi"
+            memory: "2Gi"
             cpu: "2"
           limits:
             memory: "8Gi"
             cpu: "2"
       terminationGracePeriodSeconds: 60
-      nodeSelector:
-        namespace: utility
   volumeClaimTemplates:
   - metadata:
       name: datadir
       annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+        volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
       accessModes:
       - ReadWriteOnce
@@ -78,7 +70,6 @@ spec:
     port: 5432
     protocol: TCP
     targetPort: 5432
-    nodePort:
   selector:
     app: opsdb
   type: ClusterIP

@@ -8,12 +8,11 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 8080
-    targetPort: 8080
-    nodePort:
+    port: 80
+    targetPort: http
   selector:
     app: keycloak
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,7 +33,7 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: s-hdp-vre-v007.charite.de/keycloak:10.0.2
+        image: ghcr.io/vre-charite/keycloak:10.0.2
         env:
         - name: DB_VENDOR
           value: "postgres"
@@ -45,15 +44,9 @@ spec:
         - name: KEYCLOAK_PASSWORD
           value: "$PASSWORD"
         - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-db
-              key: username
+          value: keycloak
         - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-db
-              key: password
+          value: keycloak
         - name: DB_ADDR
           value: "opsdb.utility"
         - name: DB_PORT
@@ -67,7 +60,7 @@ spec:
         - name: env
           value: "charite"
         - name: JAVA_OPTS
-          value: "-Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile.feature.scripts=enabled -Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.adminUrl=https://vre.charite.de/vre/auth/ -Dkeycloak.frontendUrl=https://vre.charite.de/vre/auth/"
+          value: "-Dkeycloak.profile.feature.token_exchange=enabled -Dkeycloak.profile.feature.scripts=enabled -Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.adminUrl=https://172.17.3.155.nip.io/vre/auth/ -Dkeycloak.frontendUrl=https://172.17.3.155.nip.io/vre/auth/"
         ports:
         - name: http
           containerPort: 8080
@@ -100,15 +93,13 @@ spec:
           - name: messages-en
             mountPath: /opt/jboss/keycloak/themes/base/login/messages/messages_en.properties
             subPath: messages_en.properties
-      nodeSelector:
-        namespace: utility
       volumes:
         - name: extensions
           persistentVolumeClaim:
-            claimName: new-keycloak-auth-extension
+            claimName: keycloak-auth-extension
         - name: antd
           persistentVolumeClaim:
-            claimName: new-keycloak-antd
+            claimName: keycloak-antd
         - name: standalone-ha
           configMap:
             name: standalone-ha.xml
