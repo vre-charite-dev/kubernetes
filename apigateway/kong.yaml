@@ -473,12 +473,6 @@ spec:
         status:
           type: object
   version: v1beta1
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -735,8 +729,6 @@ spec:
           limits:
             memory: "4Gi"
             cpu: "2"
-      imagePullSecrets:
-      - name: registrypullsecret-tls
       - env:
         - name: CONTROLLER_KONG_ADMIN_URL
           value: https://127.0.0.1:8444
@@ -794,8 +786,6 @@ spec:
           value: postgres
         image: ghcr.io/vre-charite/kongwithoidc:2.1.0
         name: wait-for-migrations
-      imagePullSecrets:
-      - name: registrypullsecret-tls
       serviceAccountName: kong-serviceaccount
 ---
 apiVersion: apps/v1

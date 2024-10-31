@@ -17,14 +17,14 @@ spec:
     spec:
       containers:
       - name: konga
-        image: s-hdp-vre-v007.charite.de/konga:latest
+        image: pantsel/konga
         env:
         - name: TOKEN_SECRET
-          value: $SECRET
+          value: 72b75607d06d83d917387a2f4d95b9b855f64063ee60d
         - name: DB_ADAPTER
           value: postgres
         - name: DB_URI
-          value: postgresql://kong:kong@postgres.utility:5432/konga
+          value: postgresql://kong:postgres@postgres.utility:5432/konga
         - name: env
           value: "charite"
         ports:
@@ -41,8 +41,6 @@ spec:
           limits:
             memory: "2Gi"
             cpu: "1"
-      nodeSelector:
-        namespace: utility
 ---
 apiVersion: v1
 kind: Service
@@ -58,5 +56,3 @@ spec:
     port: 1337
     targetPort: 1337
     protocol: TCP
-  selector:
-    app: konga
