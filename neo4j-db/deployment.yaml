@@ -10,14 +10,12 @@ spec:
     - name: http
       port: 7474
       targetPort: 7474
-      nodePort:
     - name: bolt
       port: 7687
       targetPort: 7687
-      nodePort:
   selector:
     app: neo4j-db
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -37,7 +35,7 @@ spec:
     spec:
       containers:
       - name: neo4j
-        image: s-hdp-vre-v007.charite.de/neo4j:4.0
+        image: ghcr.io/vre-charite/neo4j:4.0.8
         env:
           - name: NEO4J_apoc_export_file_enabled
             value: "true"
@@ -73,42 +71,40 @@ spec:
           periodSeconds: 10
         resources:
           requests:
-            memory: "16Gi"
-            cpu: "4"
+            memory: "2Gi"
+            cpu: "1"
           limits:
-            memory: "16Gi"
-            cpu: "4"
+            memory: "2Gi"
+            cpu: "1"
       terminationGracePeriodSeconds: 60
-      nodeSelector:
-        namespace: utility
   volumeClaimTemplates:
   - metadata:
       name: neo4j-data
       annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+        volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 100Gi
+          storage: 1Gi
   - metadata:
       name: neo4j-plugins
       annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+        volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 5Gi
+          storage: 1Gi
   - metadata:
       name: neo4j-logs
       annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+        volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 30Gi
+          storage: 1Gi
