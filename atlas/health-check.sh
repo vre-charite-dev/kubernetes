@@ -1,0 +1,2 @@
+#!/bin/bash
+</dev/tcp/atlas-0.atlas.utility.svc.cluster.local/21000 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/2181 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/61520 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/9838 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/61500 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/61510 && </dev/tcp/atlas-0.atlas.utility.svc.cluster.local/61530

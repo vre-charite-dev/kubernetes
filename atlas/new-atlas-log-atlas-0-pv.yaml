@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: new-nfs-provisioner-utility
+  name: new-atlas-log-atlas-0-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 30Gi
+  nfs:
+    path: /AG-Ritter-VRE-Utility-namespace/utility-atlas-log-atlas-0-pvc-47f4b5ae-c2d5-4986-9625-1554056049f1
+    server: bihnas2.charite.de
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem

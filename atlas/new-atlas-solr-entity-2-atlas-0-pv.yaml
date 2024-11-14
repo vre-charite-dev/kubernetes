@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: new-nfs-provisioner-utility
+  name: new-atlas-solr-entity-2-atlas-0-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  nfs:
+    path: /AG-Ritter-VRE-Utility-namespace/utility-atlas-solr-entity-2-atlas-0-pvc-ae8a68ef-8a12-4ca6-ba72-50db4658f489
+    server: bihnas2.charite.de
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
