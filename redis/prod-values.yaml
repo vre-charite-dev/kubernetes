@@ -346,7 +346,7 @@ master:
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
   ##
-  nodeSelector: {"namespace": "utility"}
+  nodeSelector: {}
   # tolerations: []
   ## Redis Master pod/node affinity/anti-affinity
   ##
@@ -543,7 +543,7 @@ slave:
   #     cpu: 100m
 
   ## Redis slave selectors and tolerations for pod assignment
-  nodeSelector: {"namespace": "utility"}
+  nodeSelector: {}
   # tolerations: []
 
   ## Use an alternate scheduler, e.g. "stork".
