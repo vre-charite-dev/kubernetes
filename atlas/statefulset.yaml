@@ -104,50 +104,50 @@ spec:
     - metadata:
         name: atlas-data
         annotations:
-          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+          volume.beta.kubernetes.io/storage-class: cinder-csi
       spec:
         accessModes:
           - ReadWriteMany
         resources:
           requests:
-            storage: 800Gi
+            storage: 5Gi
     - metadata:
         name: atlas-solr-entity-1
         annotations:
-          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+          volume.beta.kubernetes.io/storage-class: cinder-csi
       spec:
         accessModes:
           - ReadWriteMany
         resources:
           requests:
-            storage: 10Gi
+            storage: 5Gi
     - metadata:
         name: atlas-solr-entity-2
         annotations:
-          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+          volume.beta.kubernetes.io/storage-class: cinder-csi
       spec:
         accessModes:
           - ReadWriteMany
         resources:
           requests:
-            storage: 10Gi
+            storage: 5Gi
     - metadata:
         name: atlas-solr-entity-3
         annotations:
-          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+          volume.beta.kubernetes.io/storage-class: cinder-csi
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi
+    - metadata:
+        name: atlas-log
+        annotations:
+          volume.beta.kubernetes.io/storage-class: cinder-csi
       spec:
         accessModes:
           - ReadWriteMany
         resources:
           requests:
             storage: 10Gi
-    - metadata:
-        name: atlas-log
-        annotations:
-          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-      spec:
-        accessModes:
-          - ReadWriteMany
-        resources:
-          requests:
-            storage: 30Gi
