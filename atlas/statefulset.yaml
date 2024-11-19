@@ -80,11 +80,11 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              memory: "16Gi"
-              cpu: "4"
+              memory: "1000Mi"
+              cpu: "200m"
             limits:
-              memory: "16Gi"
-              cpu: "4"
+              memory: "2000Mi"
+              cpu: "800m"
       terminationGracePeriodSeconds: 60
       volumes:
         - name: health-check
