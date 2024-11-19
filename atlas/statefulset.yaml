@@ -5,11 +5,10 @@ metadata:
   namespace: utility
 spec:
   ports:
-  - port: 21000
-    protocol: TCP
-    targetPort: 21000
-    name: "21000"
-    nodePort:
+    - port: 21000
+      protocol: TCP
+      targetPort: 21000
+      name: "21000"
   selector:
     app: atlas
   type: LoadBalancer
@@ -33,124 +32,124 @@ spec:
         app: atlas
     spec:
       containers:
-      - name: atlas
-        image: s-hdp-vre-v007.charite.de/apache-atlas:2.1.0
-        imagePullPolicy: Always
-        env:
-        - name: LOG4J_FORMAT_MSG_NO_LOOKUPS
-          value: "true"
-        - name: VERSION
-          value: 2.1.0
-        - name: env
-          value: "charite"
-        command: ["/opt/apache-atlas-$(VERSION)/bin/atlas_start.py"]
-        ports:
-        - containerPort: 21000
-        - containerPort: 9838
-        - containerPort: 2181
-        livenessProbe:
-          exec:
-            command:
-            - /bin/bash
-            - /root/health-check.sh
-          failureThreshold: 5
-          initialDelaySeconds: 1200
-          periodSeconds: 5
-          successThreshold: 1
-        volumeMounts:
-        - mountPath: /opt/apache-atlas-2.1.0/data
-          name: atlas-data
-        - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/edge_index_shard1_replica_n1/data
-          name: atlas-solr-entity-1
-        - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/fulltext_index_shard1_replica_n1/data
-          name: atlas-solr-entity-2
-        - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/vertex_index_shard1_replica_n1/data
-          name: atlas-solr-entity-3
-        - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/configsets/_default/conf/managed-schema
-          subPath: managed-schema
-          name: managed-schema
-        - mountPath: /opt/apache-atlas-2.1.0/logs
-          name: atlas-log
-        - mountPath: /root/health-check.sh
-          subPath: health-check.sh
-          name: health-check
-        readinessProbe:
-          tcpSocket:
-            port: 21000
-          initialDelaySeconds: 60
-          periodSeconds: 10
-        resources:
-          requests:
-            memory: "16Gi"
-            cpu: "4"
-          limits:
-            memory: "16Gi"
-            cpu: "4"
+        - name: atlas
+          image: s-hdp-vre-v007.charite.de/apache-atlas:2.1.0
+          imagePullPolicy: Always
+          env:
+            - name: LOG4J_FORMAT_MSG_NO_LOOKUPS
+              value: "true"
+            - name: VERSION
+              value: 2.1.0
+            - name: env
+              value: "charite"
+          command: ["/opt/apache-atlas-$(VERSION)/bin/atlas_start.py"]
+          ports:
+            - containerPort: 21000
+            - containerPort: 9838
+            - containerPort: 2181
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - /root/health-check.sh
+            failureThreshold: 5
+            initialDelaySeconds: 1200
+            periodSeconds: 5
+            successThreshold: 1
+          volumeMounts:
+            - mountPath: /opt/apache-atlas-2.1.0/data
+              name: atlas-data
+            - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/edge_index_shard1_replica_n1/data
+              name: atlas-solr-entity-1
+            - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/fulltext_index_shard1_replica_n1/data
+              name: atlas-solr-entity-2
+            - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/vertex_index_shard1_replica_n1/data
+              name: atlas-solr-entity-3
+            - mountPath: /opt/apache-atlas-2.1.0/solr/server/solr/configsets/_default/conf/managed-schema
+              subPath: managed-schema
+              name: managed-schema
+            - mountPath: /opt/apache-atlas-2.1.0/logs
+              name: atlas-log
+            - mountPath: /root/health-check.sh
+              subPath: health-check.sh
+              name: health-check
+          readinessProbe:
+            tcpSocket:
+              port: 21000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "16Gi"
+              cpu: "4"
+            limits:
+              memory: "16Gi"
+              cpu: "4"
       terminationGracePeriodSeconds: 60
       nodeSelector:
         namespace: utility
       volumes:
-      - name: health-check
-        configMap:
-          name: atlas-health-check
-          defaultMode: 0755
-          items:
-          - key: health-check.sh
-            path: health-check.sh
-      - name: managed-schema
-        configMap:
-          name: managed-schema
-          items:
-          - key: managed-schema
-            path: managed-schema
+        - name: health-check
+          configMap:
+            name: atlas-health-check
+            defaultMode: 0755
+            items:
+              - key: health-check.sh
+                path: health-check.sh
+        - name: managed-schema
+          configMap:
+            name: managed-schema
+            items:
+              - key: managed-schema
+                path: managed-schema
   volumeClaimTemplates:
-  - metadata:
-      name: atlas-data
-      annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 800Gi
-  - metadata:
-      name: atlas-solr-entity-1
-      annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 10Gi
-  - metadata:
-      name: atlas-solr-entity-2
-      annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 10Gi
-  - metadata:
-      name: atlas-solr-entity-3
-      annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 10Gi
-  - metadata:
-      name: atlas-log
-      annotations:
-        volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 30Gi
+    - metadata:
+        name: atlas-data
+        annotations:
+          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 800Gi
+    - metadata:
+        name: atlas-solr-entity-1
+        annotations:
+          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: atlas-solr-entity-2
+        annotations:
+          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: atlas-solr-entity-3
+        annotations:
+          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: atlas-log
+        annotations:
+          volume.beta.kubernetes.io/storage-class: new-managed-nfs-storage-utility
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 30Gi
