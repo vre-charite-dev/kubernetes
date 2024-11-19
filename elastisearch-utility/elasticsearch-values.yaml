@@ -56,7 +56,7 @@ secretMounts: []
 #    path: /usr/share/elasticsearch/config/certs
 #    defaultMode: 0755
 
-image: "s-hdp-vre-v007.charite.de/elasticsearch"
+image: "docker.elastic.co/elasticsearch/elasticsearch"
 imageTag: "7.8.1"
 imagePullPolicy: "IfNotPresent"
 
@@ -70,11 +70,11 @@ esJavaOpts: "-Xmx1g -Xms1g"
 
 resources:
   requests:
-    cpu: "2000m"
-    memory: "4Gi"
+    cpu: "200m"
+    memory: "500Mi"
   limits:
-    cpu: "4000m"
-    memory: "8Gi"
+    cpu: "400m"
+    memory: "2Gi"
 
 initResources: {}
   # limits:
@@ -98,7 +98,7 @@ volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 300Gi
+      storage: 10Gi
 
 rbac:
   create: false
@@ -230,8 +230,6 @@ clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
 schedulerName: ""
 
 imagePullSecrets: []
-nodeSelector:
-  namespace: utility
 tolerations: []
 
 # Enabling this will publically expose your Elasticsearch instance.

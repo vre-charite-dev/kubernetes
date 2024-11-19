@@ -1,2 +1,2 @@
-sudo helm upgrade elasticsearch-utility elasticsearch -f elasticsearch.values
+sudo helm upgrade elasticsearch-utility elasticsearch -f elasticsearch-values.yaml
 
