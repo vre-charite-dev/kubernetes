@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: new-nfs-provisioner-utility
+  name: new-elasticsearch-master-elasticsearch-master-0-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 300Gi
+  nfs:
+    path: /AG-Ritter-VRE-Utility-namespace/utility-elasticsearch-master-elasticsearch-master-0-pvc-43492f09-a7da-4408-93b5-dac1f0be8bff
+    server: bihnas2.charite.de
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: new-managed-nfs-storage-utility
+  volumeMode: Filesystem
