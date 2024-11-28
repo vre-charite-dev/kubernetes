@@ -32,20 +32,22 @@ spec:
           value: keycloak
         image: postgres:9.5
         name: postgres
-        command: ["/bin/sh","-c"]
-        args: ["sh /init-keycloak.sh; psql -a -f /opsdbschema.sql -U indoc_vre;  psql -a -f /casbinonly.sql -U indoc_vre "]
+        lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "sh"
+                  - "-c"
+                  - |
+                    psql -U postgres -a -f ./script/init_db.sql;
         ports:
         - containerPort: 5432
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
-          name: datadir
+          name: opsdb-persistent-storage
           subPath: pgdata
-        - name: init-keycloak
-          mountPath: /init-keycloak.sh
-        - name: opsdbschema
-          mountPath: /opsdbschema.sql
-        - name: casbinonly
-          mountPath: /casbinonly.sql
+        - name: script
+          mountPath: /script
         readinessProbe:
           tcpSocket:
             port: 5432
@@ -60,18 +62,16 @@ spec:
             cpu: "2"
       terminationGracePeriodSeconds: 60
       volumes:
-        - name: init-keycloak
+        - name: opsdb-persistent-storage # Obtaining 'volume' from PVC
+          persistentVolumeClaim:
+            claimName: opsdb-pvc
+        - name: script
           configMap:
-          name: init-keycloak.sh
-        - name: opsdbschema
-          configMap:
-          name: opsdbschema.sql
-        - name: casbinonly
-          configMap:
-          name: casbinonly.sql
+            name: init-opsdb-configmap
+            defaultMode: 0777
   volumeClaimTemplates:
   - metadata:
-      name: datadir
+      name: opsdb
       annotations:
         volume.beta.kubernetes.io/storage-class: cinder-csi
     spec:
@@ -79,7 +79,7 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 50Gi
+          storage: 4Gi
 ---
 apiVersion: v1
 kind: Service
