@@ -1,29 +1,40 @@
 apiVersion: v1
 data:
-  opsdbschema.sql: "--\n-- PostgreSQL database dump\n--\n\n-- Dumped from database
-    version 9.5.23\n-- Dumped by pg_dump version 9.5.23\n\nSET statement_timeout =
-    0;\nSET lock_timeout = 0;\nSET client_encoding = 'UTF8';\nSET standard_conforming_strings
-    = on;\nSELECT pg_catalog.set_config('search_path', '', false);\nSET check_function_bodies
-    = false;\nSET xmloption = content;\nSET client_min_messages = warning;\nSET row_security
-    = off;\n\n--\n-- Name: indoc_vre; Type: SCHEMA; Schema: -; Owner: indoc_vre\n--\n\nCREATE
-    SCHEMA indoc_vre;\n\n\nALTER SCHEMA indoc_vre OWNER TO indoc_vre;\n\n--\n-- Name:
-    plpgsql; Type: EXTENSION; Schema: -; Owner: \n--\n\nCREATE EXTENSION IF NOT EXISTS
-    plpgsql WITH SCHEMA pg_catalog;\n\n\n--\n-- Name: EXTENSION plpgsql; Type: COMMENT;
-    Schema: -; Owner: \n--\n\nCOMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural
-    language';\n\n\n--\n-- Name: typeenum; Type: TYPE; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE
-    TYPE indoc_vre.typeenum AS ENUM (\n    'text',\n    'multiple_choice'\n);\n\n\nALTER
-    TYPE indoc_vre.typeenum OWNER TO indoc_vre;\n\nSET default_tablespace = '';\n\nSET
-    default_with_oids = false;\n\n--\n-- Name: announcement; Type: TABLE; Schema:
-    indoc_vre; Owner: indoc_vre\n--\n\nCREATE TABLE indoc_vre.announcement (\n    id
-    integer NOT NULL,\n    project_code character varying,\n    content character
-    varying,\n    version character varying,\n    publisher character varying,\n    date
-    timestamp without time zone\n);\n\n\nALTER TABLE indoc_vre.announcement OWNER
-    TO indoc_vre;\n\n--\n-- Name: announcement_id_seq; Type: SEQUENCE; Schema: indoc_vre;
-    Owner: indoc_vre\n--\n\nCREATE SEQUENCE indoc_vre.announcement_id_seq\n    START
-    WITH 1\n    INCREMENT BY 1\n    NO MINVALUE\n    NO MAXVALUE\n    CACHE 1;\n\n\nALTER
-    TABLE indoc_vre.announcement_id_seq OWNER TO indoc_vre;\n\n--\n-- Name: announcement_id_seq;
-    Type: SEQUENCE OWNED BY; Schema: indoc_vre; Owner: indoc_vre\n--\n\nALTER SEQUENCE
-    indoc_vre.announcement_id_seq OWNED BY indoc_vre.announcement.id;\n\n\n--\n--
+  init_db.sql: "\n    DO\n    \\$do\\$\n    DECLARE\n    _db TEXT := '$KEYCLOAK_DB';\n
+    \   _user TEXT := '$POSTGRES_USER';\n    _password TEXT := '$POSTGRES_PASSWORD';\n
+    \   BEGIN\n     CREATE EXTENSION IF NOT EXISTS dblink; -- enable extension \n
+    \    IF EXISTS (SELECT 1 FROM pg_database WHERE datname = _db) THEN\n       RAISE
+    NOTICE 'Database already exists';\n     ELSE\n       PERFORM dblink_connect('host=localhost
+    user=' || _user || ' password=' || _password || ' dbname=' || current_database());\n
+    \      PERFORM dblink_exec('CREATE DATABASE ' || _db);\n     END IF;\n   END\n
+    \  \\$do\\$;\n\n   \n\n    DO\n    \\$do\\$\n    BEGIN\n       IF NOT EXISTS (SELECT
+    FROM pg_catalog.pg_roles WHERE rolname = '$KEYCLOAK_USER') THEN\n          CREATE
+    USER $KEYCLOAK_USER WITH PASSWORD '$KEYCLOAK_PASSWORD';\n       END IF;\n    END\n
+    \   \\$do\\$;\n\n\n    GRANT ALL PRIVILEGES ON DATABASE $KEYCLOAK_DB TO $KEYCLOAK_USER;\n
+    \   GRANT ALL ON SCHEMA public TO $KEYCLOAK_USER;\n\n\n    --\n-- PostgreSQL database
+    dump\n--\n\n-- Dumped from database version 9.5.23\n-- Dumped by pg_dump version
+    9.5.23\n\nSET statement_timeout = 0;\nSET lock_timeout = 0;\nSET client_encoding
+    = 'UTF8';\nSET standard_conforming_strings = on;\nSELECT pg_catalog.set_config('search_path',
+    '', false);\nSET check_function_bodies = false;\nSET xmloption = content;\nSET
+    client_min_messages = warning;\nSET row_security = off;\n\n--\n-- Name: indoc_vre;
+    Type: SCHEMA; Schema: -; Owner: indoc_vre\n--\n\nCREATE SCHEMA indoc_vre;\n\n\nALTER
+    SCHEMA indoc_vre OWNER TO indoc_vre;\n\n--\n-- Name: plpgsql; Type: EXTENSION;
+    Schema: -; Owner: \n--\n\nCREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;\n\n\n--\n--
+    Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: \n--\n\nCOMMENT ON EXTENSION
+    plpgsql IS 'PL/pgSQL procedural language';\n\n\n--\n-- Name: typeenum; Type: TYPE;
+    Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE TYPE indoc_vre.typeenum AS ENUM
+    (\n    'text',\n    'multiple_choice'\n);\n\n\nALTER TYPE indoc_vre.typeenum OWNER
+    TO indoc_vre;\n\nSET default_tablespace = '';\n\nSET default_with_oids = false;\n\n--\n--
+    Name: announcement; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE
+    TABLE indoc_vre.announcement (\n    id integer NOT NULL,\n    project_code character
+    varying,\n    content character varying,\n    version character varying,\n    publisher
+    character varying,\n    date timestamp without time zone\n);\n\n\nALTER TABLE
+    indoc_vre.announcement OWNER TO indoc_vre;\n\n--\n-- Name: announcement_id_seq;
+    Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE SEQUENCE indoc_vre.announcement_id_seq\n
+    \   START WITH 1\n    INCREMENT BY 1\n    NO MINVALUE\n    NO MAXVALUE\n    CACHE
+    1;\n\n\nALTER TABLE indoc_vre.announcement_id_seq OWNER TO indoc_vre;\n\n--\n--
+    Name: announcement_id_seq; Type: SEQUENCE OWNED BY; Schema: indoc_vre; Owner:
+    indoc_vre\n--\n\nALTER SEQUENCE indoc_vre.announcement_id_seq OWNED BY indoc_vre.announcement.id;\n\n\n--\n--
     Name: approval_entity; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE
     TABLE indoc_vre.approval_entity (\n    id uuid NOT NULL,\n    request_id uuid,\n
     \   entity_geid character varying,\n    entity_type character varying,\n    review_status
@@ -249,8 +260,34 @@ data:
     Name: SCHEMA public; Type: ACL; Schema: -; Owner: indoc_vre\n--\n\nREVOKE ALL
     ON SCHEMA public FROM PUBLIC;\nREVOKE ALL ON SCHEMA public FROM indoc_vre;\nGRANT
     ALL ON SCHEMA public TO indoc_vre;\nGRANT ALL ON SCHEMA public TO PUBLIC;\n\n\n--\n--
-    PostgreSQL database dump complete\n--"
+    PostgreSQL database dump complete\n--\n\n\n--\n-- PostgreSQL database dump\n--\n\n--
+    Dumped from database version 9.5.23\n-- Dumped by pg_dump version 9.5.23\n\nSET
+    statement_timeout = 0;\nSET lock_timeout = 0;\nSET client_encoding = 'UTF8';\nSET
+    standard_conforming_strings = on;\nSELECT pg_catalog.set_config('search_path',
+    '', false);\nSET check_function_bodies = false;\nSET xmloption = content;\nSET
+    client_min_messages = warning;\nSET row_security = off;\n\nSET default_tablespace
+    = '';\n\nSET default_with_oids = false;\n\n--\n-- Name: casbin_rule; Type: TABLE;
+    Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE TABLE indoc_vre.casbin_rule
+    (\n    id integer NOT NULL,\n    ptype character varying(255),\n    v0 character
+    varying(255),\n    v1 character varying(255),\n    v2 character varying(255),\n
+    \   v3 character varying(255),\n    v4 character varying(255),\n    v5 character
+    varying(255)\n);\n\n\nALTER TABLE indoc_vre.casbin_rule OWNER TO indoc_vre;\n\n--\n--
+    Name: casbin_rule_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCREATE
+    SEQUENCE indoc_vre.casbin_rule_id_seq\n    START WITH 1\n    INCREMENT BY 1\n
+    \   NO MINVALUE\n    NO MAXVALUE\n    CACHE 1;\n\n\nALTER TABLE indoc_vre.casbin_rule_id_seq
+    OWNER TO indoc_vre;\n\n--\n-- Name: casbin_rule_id_seq; Type: SEQUENCE OWNED BY;
+    Schema: indoc_vre; Owner: indoc_vre\n--\n\nALTER SEQUENCE indoc_vre.casbin_rule_id_seq
+    OWNED BY indoc_vre.casbin_rule.id;\n\n\n--\n-- Name: id; Type: DEFAULT; Schema:
+    indoc_vre; Owner: indoc_vre\n--\n\nALTER TABLE ONLY indoc_vre.casbin_rule ALTER
+    COLUMN id SET DEFAULT nextval('indoc_vre.casbin_rule_id_seq'::regclass);\n\n\n--\n--
+    Data for Name: casbin_rule; Type: TABLE DATA; Schema: indoc_vre; Owner: indoc_vre\n--\n\nCOPY
+    indoc_vre.casbin_rule (id, ptype, v0, v1, v2, v3, v4, v5) FROM stdin;\n1\tp\tadmin\t*\tfile\tview\t\\N\t\\N\n2\tp\tadmin\t*\tfile\tdelete\t\\N\t\\N\n3\tp\tadmin\t*\tfile\tupload\t\\N\t\\N\n4\tp\tadmin\t*\tfile\tdownload\t\\N\t\\N\n5\tp\tadmin\t*\tfile\tcopy\t\\N\t\\N\n6\tp\tcollaborator\t*\tfile\tview\t\\N\t\\N\n7\tp\tcollaborator\t*\tfile\tdelete\t\\N\t\\N\n8\tp\tcollaborator\t*\tfile\tupload\t\\N\t\\N\n9\tp\tcollaborator\t*\tfile\tdownload\t\\N\t\\N\n10\tp\tcontributor\tgreenroom\tfile\tview\t\\N\t\\N\n11\tp\tcontributor\tgreenroom\tfile\tdelete\t\\N\t\\N\n12\tp\tcontributor\tgreenroom\tfile\tupload\t\\N\t\\N\n13\tp\tcontributor\tgreenroom\tfile\tdownload\t\\N\t\\N\n14\tp\tadmin\t*\tannouncement\tview\t\\N\t\\N\n15\tp\tadmin\t*\tannouncement\tcreate\t\\N\t\\N\n16\tp\tcontributor\t*\tannouncement\tview\t\\N\t\\N\n17\tp\tcollaborator\t*\tannouncement\tview\t\\N\t\\N\n18\tp\tadmin\t*\tfile_attribute_template\tview\t\\N\t\\N\n19\tp\tadmin\t*\tfile_attribute_template\tcreate\t\\N\t\\N\n20\tp\tadmin\t*\tfile_attribute_template\tupdate\t\\N\t\\N\n21\tp\tadmin\t*\tfile_attribute_template\tdelete\t\\N\t\\N\n22\tp\tadmin\t*\tfile_attribute_template\timport\t\\N\t\\N\n23\tp\tadmin\t*\tfile_attribute_template\texport\t\\N\t\\N\n24\tp\tadmin\t*\tfile_attribute_template\tattach\t\\N\t\\N\n25\tp\tcontributor\t*\tfile_attribute_template\tview\t\\N\t\\N\n26\tp\tcollaborator\t*\tfile_attribute_template\tcreate\t\\N\t\\N\n27\tp\tcollaborator\t*\tfile_attribute_template\tupdate\t\\N\t\\N\n28\tp\tcollaborator\t*\tfile_attribute_template\tdelete\t\\N\t\\N\n29\tp\tcollaborator\t*\tfile_attribute_template\tattach\t\\N\t\\N\n30\tp\tadmin\t*\tfile_attribute\tview\t\\N\t\\N\n31\tp\tadmin\t*\tfile_attribute\tcreate\t\\N\t\\N\n32\tp\tadmin\t*\tfile_attribute\tupdate\t\\N\t\\N\n33\tp\tadmin\t*\tfile_attribute\tdelete\t\\N\t\\N\n34\tp\tcollaborator\t*\tfile_attribute\tview\t\\N\t\\N\n35\tp\tcollaborator\t*\tfile_attribute\tupdate\t\\N\t\\N\n36\tp\tcollaborator\t*\tfile_attribute\tdelete\t\\N\t\\N\n37\tp\tadmin\t*\ttags\tview\t\\N\t\\N\n38\tp\tadmin\t*\ttags\tcreate\t\\N\t\\N\n39\tp\tadmin\t*\ttags\tupdate\t\\N\t\\N\n40\tp\tadmin\t*\ttags\tdelete\t\\N\t\\N\n41\tp\tcontributor\tgreenroom\ttags\tview\t\\N\t\\N\n42\tp\tcontributor\tgreenroom\ttags\tcreate\t\\N\t\\N\n43\tp\tcontributor\tgreenroom\ttags\tupdate\t\\N\t\\N\n44\tp\tcontributor\tgreenroom\ttags\tdelete\t\\N\t\\N\n45\tp\tcollaborator\t*\ttags\tview\t\\N\t\\N\n46\tp\tcollaborator\t*\ttags\tcreate\t\\N\t\\N\n47\tp\tcollaborator\t*\ttags\tupdate\t\\N\t\\N\n48\tp\tcollaborator\t*\ttags\tdelete\t\\N\t\\N\n49\tp\tadmin\t*\tresource_request\tcreate\t\\N\t\\N\n50\tp\tcollaborator\t*\tresource_request\tcreate\t\\N\t\\N\n51\tp\tplatform_admin\t*\tresource_request\tview\t\\N\t\\N\n52\tp\tplatform_admin\t*\tresource_request\tupdate\t\\N\t\\N\n53\tp\tplatform_admin\t*\tresource_request\tdelete\t\\N\t\\N\n54\tp\tadmin\t*\tworkbench\tview\t\\N\t\\N\n55\tp\tcontributor\t*\tworkbench\tview\t\\N\t\\N\n56\tp\tcollaborator\t*\tworkbench\tview\t\\N\t\\N\n57\tp\tplatform_admin\t*\tworkbench\tcreate\t\\N\t\\N\n58\tp\tadmin\t*\tfile_stats\tview\t\\N\t\\N\n59\tp\tcontributor\t*\tfile_stats\tview\t\\N\t\\N\n60\tp\tcollaborator\t*\tfile_stats\tview\t\\N\t\\N\n61\tp\tadmin\t*\taudit_logs\tview\t\\N\t\\N\n62\tp\tcontributor\t*\taudit_logs\tview\t\\N\t\\N\n63\tp\tcollaborator\t*\taudit_logs\tview\t\\N\t\\N\n64\tp\tadmin\t*\tlineage\tview\t\\N\t\\N\n65\tp\tcontributor\tgreenroom\tlineage\tview\t\\N\t\\N\n66\tp\tadmin\t*\tinvite\tview\t\\N\t\\N\n67\tp\tadmin\t*\tinvite\tcreate\t\\N\t\\N\n68\tp\tadmin\t*\tproject\tview\t\\N\t\\N\n69\tp\tadmin\t*\tproject\tupdate\t\\N\t\\N\n70\tp\tcontributor\t*\tproject\tview\t\\N\t\\N\n71\tp\tcollaborator\t*\tproject\tview\t\\N\t\\N\n72\tp\tplatform_admin\t*\tproject\tcreate\t\\N\t\\N\n73\tp\tadmin\t*\ttasks\tview\t\\N\t\\N\n74\tp\tadmin\t*\ttasks\tdelete\t\\N\t\\N\n75\tp\tcontributor\t*\ttasks\tview\t\\N\t\\N\n76\tp\tcontributor\t*\ttasks\tdelete\t\\N\t\\N\n77\tp\tcollaborator\t*\ttasks\tview\t\\N\t\\N\n78\tp\tcollaborator\t*\ttasks\tdelete\t\\N\t\\N\n79\tp\tadmin\t*\tusers\tview\t\\N\t\\N\n80\tp\tplatform_admin\t*\tnotification\tcreate\t\\N\t\\N\n85\tp\tcollaborator\t*\tlineage\tview\t\\N\t\\N\n86\tp\tcontributor\tgreenroom\tfile_attribute\tview\t\\N\t\\N\n87\tp\tcontributor\tgreenroom\tfile_attribute_template\tattach\t\\N\t\\N\n92\tp\tcontributor\tgreenroom\tfile_attribute\tupdate\t\\N\t\\N\n94\tp\tcollaborator\t*\tfile_attribute_template\tview\t\\N\t\\N\n95\tp\tadmin\t*\tcopyrequest\tview\t\\N\t\\N\n96\tp\tadmin\t*\tcopyrequest\tupdate\t\\N\t\\N\n97\tp\tcollaborator\t*\tcopyrequest\tcreate\t\\N\t\\N\n98\tp\tcollaborator\t*\tcopyrequest\tview\t\\N\t\\N\n81\tp\tadmin\tcore\tcollections\tview\t\\N\t\\N\n82\tp\tadmin\tcore\tcollections\tcreate\t\\N\t\\N\n83\tp\tadmin\tcore\tcollections\tupdate\t\\N\t\\N\n84\tp\tadmin\tcore\tcollections\tdelete\t\\N\t\\N\n88\tp\tcollaborator\tcore\tcollections\tview\t\\N\t\\N\n89\tp\tcollaborator\tcore\tcollections\tcreate\t\\N\t\\N\n90\tp\tcollaborator\tcore\tcollections\tupdate\t\\N\t\\N\n91\tp\tcollaborator\tcore\tcollections\tdelete\t\\N\t\\N\n93\tp\tcontributor\tcore\tcollections\tview\t\\N\t\\N\n\\.\n\n\n--\n--
+    Name: casbin_rule_id_seq; Type: SEQUENCE SET; Schema: indoc_vre; Owner: indoc_vre\n--\n\nSELECT
+    pg_catalog.setval('indoc_vre.casbin_rule_id_seq', 98, true);\n\n\n--\n-- Name:
+    casbin_rule_pkey; Type: CONSTRAINT; Schema: indoc_vre; Owner: indoc_vre\n--\n\nALTER
+    TABLE ONLY indoc_vre.casbin_rule\n    ADD CONSTRAINT casbin_rule_pkey PRIMARY
+    KEY (id);\n\n\n--\n-- PostgreSQL database dump complete\n--"
 kind: ConfigMap
 metadata:
-  name: opsdbschema.sql
+  name: init-opsdb-configmap
   namespace: utility

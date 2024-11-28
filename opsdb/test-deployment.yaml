@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: opsdb-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: /data/postgres
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opsdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: opsdb-pv
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opsdb-secret
+type: Opaque
+data:
+  POSTGRES_USER: cG9zdGdyZXM=     # printf postgres | base64
+  POSTGRES_PASSWORD: cG9zdGdyZXM=  # printf postgres | base64
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opsdb
+  namespace: utility
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opsdb
+  serviceName: opsdb
+  template:
+    metadata:
+      labels:
+        app: opsdb
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:9.5
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - "sh"
+                  - "-c"
+                  - |
+                    psql -U postgres -a -f ./script/init_db.sql;
+          env:
+            - name: POSTGRES_DB
+              value: INDOC_VRE
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: KEYCLOAK_USER
+              value: keycloak
+            - name: KEYCLOAK_PASSWORD
+              value: keycloak
+            - name: KEYCLOAK_DB
+              value: keycloak
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "2"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          volumeMounts:
+            - name: opsdb-volume-mounts
+              mountPath: /var/lib/postgresql/data
+            - name: script
+              mountPath: /script
+            #- name: opsdbschema
+            #  mountPath: /opsdbschema.sql
+            #- name: casbinonly
+            #  mountPath: /casbinonly.sql
+            
+      volumes:
+        - name: opsdb-volume-mounts
+          persistentVolumeClaim:
+            claimName: opsdb-pvc
+        - name: script
+          configMap:
+            name: init-opsdb-configmap
+            defaultMode: 0777
+        #- name: opsdbschema
+        #  configMap:
+        #  name: opsdbschema
+        #- name: casbinonly
+        #  configMap:
+        #  name: casbinonly
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opsdb
+  labels:
+    app: opsdb
+spec:
+  selector:
+    app: opsdb
+  type: ClusterIP
+  ports:
+    - name: pgql
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
