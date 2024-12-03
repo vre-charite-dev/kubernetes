@@ -1,35 +1,60 @@
 
-    DO
-    \$do\$
-    DECLARE
-    _db TEXT := '$KEYCLOAK_DB';
-    _user TEXT := '$POSTGRES_USER';
-    _password TEXT := '$POSTGRES_PASSWORD';
+   --- Keycloak DB , user creation
+   
+     DO
+    $do$
+
     BEGIN
-     CREATE EXTENSION IF NOT EXISTS dblink; -- enable extension 
-     IF EXISTS (SELECT 1 FROM pg_database WHERE datname = _db) THEN
+      
+       IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
+         RAISE NOTICE 'Database already exists';
+       ELSE
+         PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
+         PERFORM dblink_exec('CREATE DATABASE ' || 'keycloak');
+       END IF;
+    END
+    $do$;
+
+    DO
+    $do$
+    BEGIN
+       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'keycloak') THEN
+          CREATE USER keycloak WITH PASSWORD 'keycloak';
+       END IF;
+    END
+    $do$;
+
+
+   GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+   GRANT ALL ON SCHEMA public TO keycloak;
+
+    DO
+    $do$
+    
+    BEGIN
+     
+     IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'indoc_vre') THEN
        RAISE NOTICE 'Database already exists';
      ELSE
-       PERFORM dblink_connect('host=localhost user=' || _user || ' password=' || _password || ' dbname=' || current_database());
-       PERFORM dblink_exec('CREATE DATABASE ' || _db);
+       PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
+       PERFORM dblink_exec('CREATE DATABASE ' || 'indoc_vre');
      END IF;
    END
    \$do\$;
-
-   
-
+    
     DO
     \$do\$
     BEGIN
-       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$KEYCLOAK_USER') THEN
-          CREATE USER $KEYCLOAK_USER WITH PASSWORD '$KEYCLOAK_PASSWORD';
+       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'indoc_vre') THEN
+          CREATE USER indoc_vre WITH PASSWORD 'indoc_vre';
        END IF;
     END
     \$do\$;
 
-
-    GRANT ALL PRIVILEGES ON DATABASE $KEYCLOAK_DB TO $KEYCLOAK_USER;
-    GRANT ALL ON SCHEMA public TO $KEYCLOAK_USER;
+   
+    GRANT ALL PRIVILEGES ON DATABASE indoc_vre TO indoc_vre;
+    GRANT ALL ON SCHEMA public TO indoc_vre;
+    
 
 
     --
@@ -53,7 +78,7 @@ SET row_security = off;
 -- Name: indoc_vre; Type: SCHEMA; Schema: -; Owner: indoc_vre
 --
 
-CREATE SCHEMA indoc_vre;
+CREATE SCHEMA IF NOT EXISTS indoc_vre ;
 
 
 ALTER SCHEMA indoc_vre OWNER TO indoc_vre;
@@ -76,10 +101,18 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 -- Name: typeenum; Type: TYPE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TYPE indoc_vre.typeenum AS ENUM (
-    'text',
-    'multiple_choice'
-);
+
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = indoc_vre.typeenum) THEN
+        CREATE TYPE indoc_vre.typeenum AS ENUM (
+                 'text',
+                 'multiple_choice'
+         );
+    END IF;
+END
+$$;
 
 
 ALTER TYPE indoc_vre.typeenum OWNER TO indoc_vre;
@@ -92,7 +125,7 @@ SET default_with_oids = false;
 -- Name: announcement; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.announcement (
+CREATE TABLE IF NOT EXISTS indoc_vre.announcement (
     id integer NOT NULL,
     project_code character varying,
     content character varying,
@@ -108,7 +141,7 @@ ALTER TABLE indoc_vre.announcement OWNER TO indoc_vre;
 -- Name: announcement_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.announcement_id_seq
+CREATE SEQUENCE IF NOT EXISTS  indoc_vre.announcement_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -129,7 +162,7 @@ ALTER SEQUENCE indoc_vre.announcement_id_seq OWNED BY indoc_vre.announcement.id;
 -- Name: approval_entity; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.approval_entity (
+CREATE TABLE IF NOT EXISTS  indoc_vre.approval_entity (
     id uuid NOT NULL,
     request_id uuid,
     entity_geid character varying,
@@ -153,7 +186,7 @@ ALTER TABLE indoc_vre.approval_entity OWNER TO indoc_vre;
 -- Name: approval_request; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.approval_request (
+CREATE TABLE IF NOT EXISTS indoc_vre.approval_request (
     id uuid NOT NULL,
     status character varying,
     submitted_by character varying,
@@ -176,7 +209,7 @@ ALTER TABLE indoc_vre.approval_request OWNER TO indoc_vre;
 -- Name: archive_preview; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.archive_preview (
+CREATE TABLE IF NOT EXISTS indoc_vre.archive_preview (
     id integer NOT NULL,
     file_geid character varying,
     archive_preview character varying
@@ -189,7 +222,7 @@ ALTER TABLE indoc_vre.archive_preview OWNER TO indoc_vre;
 -- Name: archive_preview_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.archive_preview_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.archive_preview_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -210,7 +243,7 @@ ALTER SEQUENCE indoc_vre.archive_preview_id_seq OWNED BY indoc_vre.archive_previ
 -- Name: bids_results; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.bids_results (
+CREATE TABLE IF NOT EXISTS indoc_vre.bids_results (
     id integer NOT NULL,
     dataset_geid character varying(50) NOT NULL,
     created_time timestamp without time zone NOT NULL,
@@ -225,7 +258,7 @@ ALTER TABLE indoc_vre.bids_results OWNER TO indoc_vre;
 -- Name: bids_results_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.bids_results_id_seq
+CREATE SEQUENCE IF NOT EXISTS  indoc_vre.bids_results_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -246,7 +279,7 @@ ALTER SEQUENCE indoc_vre.bids_results_id_seq OWNED BY indoc_vre.bids_results.id;
 -- Name: casbin_rule; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.casbin_rule (
+CREATE TABLE IF NOT EXISTS  indoc_vre.casbin_rule (
     id integer NOT NULL,
     ptype character varying(255),
     v0 character varying(255),
@@ -264,7 +297,7 @@ ALTER TABLE indoc_vre.casbin_rule OWNER TO indoc_vre;
 -- Name: casbin_rule_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.casbin_rule_id_seq
+CREATE SEQUENCE IF NOT EXISTS  indoc_vre.casbin_rule_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -285,7 +318,7 @@ ALTER SEQUENCE indoc_vre.casbin_rule_id_seq OWNED BY indoc_vre.casbin_rule.id;
 -- Name: data_attribute; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.data_attribute (
+CREATE TABLE IF NOT EXISTS  indoc_vre.data_attribute (
     id integer NOT NULL,
     manifest_id integer,
     name character varying,
@@ -302,7 +335,7 @@ ALTER TABLE indoc_vre.data_attribute OWNER TO indoc_vre;
 -- Name: data_attribute_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.data_attribute_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.data_attribute_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -323,7 +356,7 @@ ALTER SEQUENCE indoc_vre.data_attribute_id_seq OWNED BY indoc_vre.data_attribute
 -- Name: data_manifest; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.data_manifest (
+CREATE TABLE IF NOT EXISTS indoc_vre.data_manifest (
     id integer NOT NULL,
     name character varying,
     project_code character varying
@@ -336,7 +369,7 @@ ALTER TABLE indoc_vre.data_manifest OWNER TO indoc_vre;
 -- Name: data_manifest_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.data_manifest_id_seq
+CREATE SEQUENCE IF NOT EXISTS  indoc_vre.data_manifest_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -357,7 +390,7 @@ ALTER SEQUENCE indoc_vre.data_manifest_id_seq OWNED BY indoc_vre.data_manifest.i
 -- Name: dataset_schema; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.dataset_schema (
+CREATE TABLE IF NOT EXISTS indoc_vre.dataset_schema (
     geid character varying NOT NULL,
     name character varying,
     dataset_geid character varying,
@@ -378,7 +411,7 @@ ALTER TABLE indoc_vre.dataset_schema OWNER TO indoc_vre;
 -- Name: dataset_schema_template; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.dataset_schema_template (
+CREATE TABLE IF NOT EXISTS  indoc_vre.dataset_schema_template (
     geid character varying NOT NULL,
     name character varying,
     dataset_geid character varying,
@@ -398,7 +431,7 @@ ALTER TABLE indoc_vre.dataset_schema_template OWNER TO indoc_vre;
 -- Name: dataset_version; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.dataset_version (
+CREATE TABLE IF NOT EXISTS indoc_vre.dataset_version (
     id integer NOT NULL,
     dataset_code character varying,
     dataset_geid character varying,
@@ -416,7 +449,7 @@ ALTER TABLE indoc_vre.dataset_version OWNER TO indoc_vre;
 -- Name: dataset_version_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.dataset_version_id_seq
+CREATE SEQUENCE  IF NOT EXISTS indoc_vre.dataset_version_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -437,7 +470,7 @@ ALTER SEQUENCE indoc_vre.dataset_version_id_seq OWNED BY indoc_vre.dataset_versi
 -- Name: resource_request; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.resource_request (
+CREATE TABLE IF NOT EXISTS indoc_vre.resource_request (
     id integer NOT NULL,
     user_geid character varying,
     username character varying,
@@ -457,7 +490,7 @@ ALTER TABLE indoc_vre.resource_request OWNER TO indoc_vre;
 -- Name: resource_request_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.resource_request_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.resource_request_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -478,7 +511,7 @@ ALTER SEQUENCE indoc_vre.resource_request_id_seq OWNED BY indoc_vre.resource_req
 -- Name: system_metrics; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.system_metrics (
+CREATE TABLE IF NOT EXISTS indoc_vre.system_metrics (
     id integer NOT NULL,
     active_user integer,
     project integer,
@@ -496,7 +529,7 @@ ALTER TABLE indoc_vre.system_metrics OWNER TO indoc_vre;
 -- Name: system_metrics_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.system_metrics_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.system_metrics_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -517,7 +550,7 @@ ALTER SEQUENCE indoc_vre.system_metrics_id_seq OWNED BY indoc_vre.system_metrics
 -- Name: user_invitation; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.user_invitation (
+CREATE TABLE IF NOT EXISTS indoc_vre.user_invitation (
     invitation_code text,
     invitation_detail text,
     expiry_timestamp timestamp without time zone NOT NULL,
@@ -537,7 +570,7 @@ ALTER TABLE indoc_vre.user_invitation OWNER TO indoc_vre;
 -- Name: user_invitation_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.user_invitation_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.user_invitation_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -558,7 +591,7 @@ ALTER SEQUENCE indoc_vre.user_invitation_id_seq OWNED BY indoc_vre.user_invitati
 -- Name: user_key; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.user_key (
+CREATE TABLE IF NOT EXISTS indoc_vre.user_key (
     id integer NOT NULL,
     user_geid character varying,
     public_key character varying,
@@ -574,7 +607,7 @@ ALTER TABLE indoc_vre.user_key OWNER TO indoc_vre;
 -- Name: user_key_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.user_key_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.user_key_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -595,7 +628,7 @@ ALTER SEQUENCE indoc_vre.user_key_id_seq OWNED BY indoc_vre.user_key.id;
 -- Name: user_password_reset; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.user_password_reset (
+CREATE TABLE IF NOT EXISTS indoc_vre.user_password_reset (
     reset_token text,
     email text,
     expiry_timestamp timestamp without time zone NOT NULL
@@ -608,7 +641,7 @@ ALTER TABLE indoc_vre.user_password_reset OWNER TO indoc_vre;
 -- Name: workbench_resource; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.workbench_resource (
+CREATE TABLE IF NOT EXISTS indoc_vre.workbench_resource (
     id integer NOT NULL,
     geid character varying,
     project_code character varying,
@@ -625,7 +658,7 @@ ALTER TABLE indoc_vre.workbench_resource OWNER TO indoc_vre;
 -- Name: workbench_resource_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.workbench_resource_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.workbench_resource_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -898,8 +931,8 @@ ALTER TABLE ONLY indoc_vre.dataset_schema
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: indoc_vre
 --
 
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM indoc_vre;
+--REVOKE ALL ON SCHEMA public FROM PUBLIC;
+--REVOKE ALL ON SCHEMA public FROM indoc_vre;
 GRANT ALL ON SCHEMA public TO indoc_vre;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
@@ -934,7 +967,7 @@ SET default_with_oids = false;
 -- Name: casbin_rule; Type: TABLE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE TABLE indoc_vre.casbin_rule (
+CREATE TABLE IF NOT EXISTS indoc_vre.casbin_rule (
     id integer NOT NULL,
     ptype character varying(255),
     v0 character varying(255),
@@ -952,7 +985,7 @@ ALTER TABLE indoc_vre.casbin_rule OWNER TO indoc_vre;
 -- Name: casbin_rule_id_seq; Type: SEQUENCE; Schema: indoc_vre; Owner: indoc_vre
 --
 
-CREATE SEQUENCE indoc_vre.casbin_rule_id_seq
+CREATE SEQUENCE IF NOT EXISTS indoc_vre.casbin_rule_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
