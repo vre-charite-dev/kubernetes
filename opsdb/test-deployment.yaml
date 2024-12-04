@@ -58,7 +58,7 @@ spec:
                   - "sh"
                   - "-c"
                   - |
-                    psql -U postgres -a -f ./script/init_db.sql -v KEYCLOAK_DB=$KEYCLOAK_DB -v KEYCLOAK_USER=$KEYCLOAK_USER -v KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD -v INDOC_USER=$INDOC_USER -v INDOC_PASSWORD=$INDOC_PASSWORD;
+                    psql -U postgres -a -f ./script/init_db.sql -v KEYCLOAK_DB=$KEYCLOAK_DB -v KEYCLOAK_USER=$KEYCLOAK_USER -v KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD -v INDOC_DB=$POSTGRES_DB -v INDOC_USER=$INDOC_USER -v INDOC_PASSWORD=$INDOC_PASSWORD;
           env:
             - name: POSTGRES_DB
               value: indoc_vre

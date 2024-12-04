@@ -17,9 +17,9 @@ data:
     USER _user WITH PASSWORD '_pass';\n          EXECUTE format('CREATE USER %I WITH
     PASSWORD %L', _user, _pass);\n      END IF;\n   END\n   $func$ LANGUAGE plpgsql;\n\nSELECT
     pg_temp.f_try_create_user(:'KEYCLOAK_USER',:'KEYCLOAK_PASSWORD');\nSELECT pg_temp.f_try_create_user(:'INDOC_USER',:'INDOC_PASSWORD');\n
-    \  \n    \nGRANT ALL PRIVILEGES ON DATABASE $KEYCLOAK_DB TO $KEYCLOAK_USER;\nGRANT
-    ALL ON SCHEMA public TO $KEYCLOAK_USER;\n   \nGRANT ALL PRIVILEGES ON DATABASE
-    indoc_vre TO indoc_vre;\nGRANT ALL ON SCHEMA public TO indoc_vre;\n    \n\n--\n--
+    \  \n    \nGRANT ALL PRIVILEGES ON DATABASE :KEYCLOAK_DB TO :KEYCLOAK_USER;\nGRANT
+    ALL ON SCHEMA public TO :KEYCLOAK_USER;\n   \nGRANT ALL PRIVILEGES ON DATABASE
+    :INDOC_DB TO :INDOC_USER;\nGRANT ALL ON SCHEMA public TO :INDOC_USER;\n    \n\n--\n--
     PostgreSQL database dump\n--\n\n-- Dumped from database version 9.5.23\n-- Dumped
     by pg_dump version 9.5.23\n\nSET statement_timeout = 0;\nSET lock_timeout = 0;\nSET
     client_encoding = 'UTF8';\nSET standard_conforming_strings = on;\nSELECT pg_catalog.set_config('search_path',
@@ -305,8 +305,8 @@ data:
     KEY (id);\n\n\n--\n-- PostgreSQL database dump complete\n--"
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2024-12-04T10:54:10Z"
+  creationTimestamp: "2024-12-04T11:12:17Z"
   name: init-opsdb-configmap
   namespace: utility
-  resourceVersion: "77316"
-  uid: 1440707a-97c4-4a4d-84a7-8a30e3319a0f
+  resourceVersion: "78360"
+  uid: cef916b3-df46-4feb-a530-911a7498ca05
