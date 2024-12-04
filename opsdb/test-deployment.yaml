@@ -58,10 +58,14 @@ spec:
                   - "sh"
                   - "-c"
                   - |
-                    psql -U postgres -a -f ./script/init_db.sql;
+                    psql -U postgres -a -f ./script/init_db.sql -v KEYCLOAK_DB=$KEYCLOAK_DB -v KEYCLOAK_USER=$KEYCLOAK_USER -v KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD -v INDOC_USER=$INDOC_USER -v INDOC_PASSWORD=$INDOC_PASSWORD;
           env:
             - name: POSTGRES_DB
-              value: INDOC_VRE
+              value: indoc_vre
+            - name: INDOC_USER
+              value: indoc_vre
+            - name: INDOC_PASSWORD
+              value: indoc_vre
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_USER

@@ -1,63 +1,60 @@
 
    --- Keycloak DB , user creation
-   
-     DO
-    $do$
-
-    BEGIN
-      
-       IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
-         RAISE NOTICE 'Database already exists';
-       ELSE
-         PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
-         PERFORM dblink_exec('CREATE DATABASE ' || 'keycloak');
-       END IF;
-    END
-    $do$;
+    CREATE extension IF NOT EXISTS dblink;
 
     DO
     $do$
     BEGIN
-       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'keycloak') THEN
-          CREATE USER keycloak WITH PASSWORD 'keycloak';
-       END IF;
-    END
-    $do$;
+     
+     IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
+       RAISE NOTICE 'Database already exists';
+     ELSE
+       PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE keycloak');
+     END IF;
+   END
+   $do$;
 
-
-   GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
-   GRANT ALL ON SCHEMA public TO keycloak;
-
-    DO
-    $do$
     
+    DO
+    $do$
     BEGIN
      
      IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'indoc_vre') THEN
        RAISE NOTICE 'Database already exists';
      ELSE
-       PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
-       PERFORM dblink_exec('CREATE DATABASE ' || 'indoc_vre');
+       --PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
+       --PERFORM dblink_exec('CREATE DATABASE ' || 'indoc_vre');
+       PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE indoc_vre');
      END IF;
    END
-   \$do\$;
-    
-    DO
-    \$do\$
-    BEGIN
-       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'indoc_vre') THEN
-          CREATE USER indoc_vre WITH PASSWORD 'indoc_vre';
-       END IF;
-    END
-    \$do\$;
+   $do$;
 
+CREATE OR REPLACE FUNCTION pg_temp.f_try_create_user(u text, pass text)
+	 RETURNS void AS
+   $func$
+   DECLARE
+     _user text := u;
+	 _pass text := pass;
+   BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '_user') THEN
+          --CREATE USER _user WITH PASSWORD '_pass';
+          EXECUTE format('CREATE USER %I WITH PASSWORD %L', _user, _pass);
+      END IF;
+   END
+   $func$ LANGUAGE plpgsql;
+
+SELECT pg_temp.f_try_create_user(:'KEYCLOAK_USER',:'KEYCLOAK_PASSWORD');
+SELECT pg_temp.f_try_create_user(:'INDOC_USER',:'INDOC_PASSWORD');
    
-    GRANT ALL PRIVILEGES ON DATABASE indoc_vre TO indoc_vre;
-    GRANT ALL ON SCHEMA public TO indoc_vre;
+    
+GRANT ALL PRIVILEGES ON DATABASE $KEYCLOAK_DB TO $KEYCLOAK_USER;
+GRANT ALL ON SCHEMA public TO $KEYCLOAK_USER;
+   
+GRANT ALL PRIVILEGES ON DATABASE indoc_vre TO indoc_vre;
+GRANT ALL ON SCHEMA public TO indoc_vre;
     
 
-
-    --
+--
 -- PostgreSQL database dump
 --
 
@@ -105,7 +102,7 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = indoc_vre.typeenum) THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'indoc_vre.typeenum') THEN
         CREATE TYPE indoc_vre.typeenum AS ENUM (
                  'text',
                  'multiple_choice'
