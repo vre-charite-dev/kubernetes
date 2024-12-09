@@ -2,32 +2,26 @@
    --- Keycloak DB , user creation
     CREATE extension IF NOT EXISTS dblink;
 
-    DO
-    $do$
+   
+CREATE OR REPLACE FUNCTION pg_temp.f_create_db(db text)
+      RETURNS void AS
+    $func$
+    DECLARE
+       _db text := db;
     BEGIN
      
-     IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
-       RAISE NOTICE 'Database already exists';
-     ELSE
-       PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE keycloak');
-     END IF;
-   END
-   $do$;
+      IF EXISTS (SELECT 1 FROM pg_database WHERE datname = _db) THEN
+         RAISE NOTICE 'Database already exists';
+       ELSE
+ 
+          PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE ' || _db);
+       END IF;
 
-    
-    DO
-    $do$
-    BEGIN
-     
-     IF EXISTS (SELECT 1 FROM pg_database WHERE datname = 'indoc_vre') THEN
-       RAISE NOTICE 'Database already exists';
-     ELSE
-       --PERFORM dblink_connect('host=localhost user=' || 'postgres' || ' password=' || 'postgres' || ' dbname=' || current_database());
-       --PERFORM dblink_exec('CREATE DATABASE ' || 'indoc_vre');
-       PERFORM dblink_exec('dbname=' || current_database(), 'CREATE DATABASE indoc_vre');
-     END IF;
-   END
-   $do$;
+    END
+    $func$ LANGUAGE plpgsql;
+
+SELECT pg_temp.f_create_db(:'KEYCLOAK_DB');	
+SELECT pg_temp.f_create_db(:'INDOC_DB');		
 
 CREATE OR REPLACE FUNCTION pg_temp.f_try_create_user(u text, pass text)
 	 RETURNS void AS
@@ -61,7 +55,7 @@ GRANT ALL ON SCHEMA public TO :INDOC_USER;
 -- Dumped from database version 9.5.23
 -- Dumped by pg_dump version 9.5.23
 
-\c :INDOC_DB
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -78,6 +72,8 @@ SET row_security = off;
 --
 
 CREATE SCHEMA IF NOT EXISTS indoc_vre ;
+
+\c :INDOC_DB
 
 
 ALTER SCHEMA indoc_vre OWNER TO indoc_vre;
@@ -101,17 +97,17 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 --
 
 
+-- https://stackoverflow.com/questions/7624919/check-if-a-user-defined-type-already-exists-in-postgresql
 
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'indoc_vre.typeenum') THEN
-        CREATE TYPE indoc_vre.typeenum AS ENUM (
-                 'text',
-                 'multiple_choice'
-         );
-    END IF;
-END
-$$;
+DO $$ BEGIN
+    CREATE TYPE indoc_vre.typeenum AS ENUM 
+    (
+        'text',
+        'multiple_choice'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 
 ALTER TYPE indoc_vre.typeenum OWNER TO indoc_vre;
