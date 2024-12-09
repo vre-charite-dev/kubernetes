@@ -61,6 +61,8 @@ GRANT ALL ON SCHEMA public TO :INDOC_USER;
 -- Dumped from database version 9.5.23
 -- Dumped by pg_dump version 9.5.23
 
+\c :INDOC_DB
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
