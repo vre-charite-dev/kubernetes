@@ -36,7 +36,7 @@ CREATE OR REPLACE FUNCTION pg_temp.f_try_create_user(u text, pass text)
      _user text := u;
 	 _pass text := pass;
    BEGIN
-      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '_user') THEN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = _user) THEN
           --CREATE USER _user WITH PASSWORD '_pass';
           EXECUTE format('CREATE USER %I WITH PASSWORD %L', _user, _pass);
       END IF;
