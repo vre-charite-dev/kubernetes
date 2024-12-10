@@ -1,4 +1,57 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neo4j-data-pv
+  namespace: utility
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: /data/neo4j
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neo4j-logs-pv
+  namespace: utility
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: /logs
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-data-pvc
+  namespace: utility
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: neo4j-data-pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  volumeName: neo4j-logs-pv
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: neo4j-db
@@ -43,7 +96,8 @@ spec:
                 - "sh"
                 - "-c"
                 - |
-                  sleep 10 && cypher-shell -u neo4j -p $NEO4J_PASSWORD -f /var/lib/neo4j/scripts/user_admin.cypher --param "ROLE => 'admin'" --param "EMAIL => '$ADMIN_EMAIL'" 
+                  sleep 10 && cypher-shell -u neo4j -p $PASSWORD -f /var/lib/neo4j/scripts/user_admin.cypher --param "ROLE => 'admin'" --param "EMAIL => '$ADMIN_EMAIL'" 
+
         env:
           - name: NEO4J_apoc_export_file_enabled
             value: "true"
@@ -55,10 +109,16 @@ spec:
             value: \[\"apoc\"\]
           - name: env
             value: "charite"
-          - name: "NEO4J_PASSWORD"
-            value: "mysupersavepassword"
+          - name: NEO4J_AUTH
+            value: "neo4j/password"
+          - name: NEO4j_dbms_connector_bolt_listen__address
+            value: "0.0.0.0:7687"
+          - name: USER
+            value: "neo4j"
+          - name: PASSWORD
+            value: "password"
           - name: ADMIN_EMAIL
-            value: "vre-admin@charite.de"
+            value: "test-vre-admin@charite.de"
 #          - name: NEO4J_SECRETS_PASSWORD
 #            valueFrom:
 #              secretKeyRef:
@@ -70,14 +130,14 @@ spec:
         - containerPort: 7687
           name: bolt
         volumeMounts:
-        - name: neo4j-data
+        - name: neo4j-data-volume-mounts
           mountPath: /data
-        - name: neo4j-plugins
-          mountPath: /plugins
-        - name: neo4j-logs
+        - name: neo4j-logs-volume-mounts
           mountPath: /logs
         - name: script
           mountPath: /var/lib/neo4j/scripts
+        #- name: neo4j-plugins
+        #  mountPath: /plugins
         readinessProbe:
           tcpSocket:
             port: 7687
@@ -92,38 +152,14 @@ spec:
             cpu: "1"
       terminationGracePeriodSeconds: 60
       volumes:
+        - name: neo4j-data-volume-mounts
+          persistentVolumeClaim:
+            claimName: neo4j-data-pvc
+        - name: neo4j-logs-volume-mounts
+          persistentVolumeClaim:
+            claimName: neo4j-logs-pvc
         - name: script
           configMap:
-            name: neo4j-script
+            name: scripts-configmap
             defaultMode: 0777
-  volumeClaimTemplates:
-  - metadata:
-      name: neo4j-data
-      annotations:
-        volume.beta.kubernetes.io/storage-class: cinder-csi
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 1Gi
-  - metadata:
-      name: neo4j-plugins
-      annotations:
-        volume.beta.kubernetes.io/storage-class: cinder-csi
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 1Gi
-  - metadata:
-      name: neo4j-logs
-      annotations:
-        volume.beta.kubernetes.io/storage-class: cinder-csi
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 1Gi
+  
