@@ -2,11 +2,13 @@ apiVersion: v1
 data:
   user_admin.cypher: "MERGE (\n    u:User {global_entity_id: 'e25a09aa-919f-11eb-ac2b-ee9477001436-1617140144',
     \n    announcement_indoctestproject: 7, \n    path: 'users', \n    time_lastmodified:
-    '2023-02-13T15:27:53.831053083', \n    role: 'admin', \n    last_login: '2023-03-15T15:12:13.280840',
-    \n    name: 'admin', \n    last_name: 'admin', \n    first_name: 'admin', \n    email:
-    'vre-admin@charite.de', \n    username: 'admin', \n    status: 'active'}) RETURN
-    u;"
+    '2023-02-13T15:27:53.831053083', \n    role: $ROLE, \n    last_login: '2023-03-15T15:12:13.280840',
+    \n    name: $ROLE, \n    last_name: $ROLE, \n    first_name: $ROLE, \n    email:
+    $EMAIL, \n    username: $ROLE, \n    status: 'active'}) RETURN u;"
 kind: ConfigMap
 metadata:
+  creationTimestamp: "2024-12-10T13:12:22Z"
   name: neo4j-script
   namespace: utility
+  resourceVersion: "59618594"
+  uid: 03671d88-35ed-47df-a8c1-3fdf8c81e182
