@@ -25,9 +25,15 @@ spec:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         - name: POSTGRES_USER
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              name: opsdb
+              key: username
         - name: POSTGRES_PASSWORD
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              name: opsdb
+              key: password
         - name: KEYCLOAK_USER
           value: keycloak
         - name: KEYCLOAK_PASSWORD
@@ -48,10 +54,11 @@ spec:
         - containerPort: 5432
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
-          name: opsdb-persistent-storage
+          name: opsdb
           subPath: pgdata
         - name: script
           mountPath: /script
+          readOnly: true
         readinessProbe:
           tcpSocket:
             port: 5432
@@ -66,12 +73,9 @@ spec:
             cpu: "2"
       terminationGracePeriodSeconds: 60
       volumes:
-        - name: opsdb-persistent-storage # Obtaining 'volume' from PVC
-          persistentVolumeClaim:
-            claimName: opsdb-pvc
         - name: script
           configMap:
-            name: init-opsdb-configmap
+            name: opsdb-script
             defaultMode: 0777
   volumeClaimTemplates:
   - metadata:
