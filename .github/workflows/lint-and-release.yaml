@@ -1,0 +1,19 @@
+name: Trigger Release
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  call-commit-lint-workflow:
+    uses: vre-charite-dev/quickstart/.github/workflows/commit-lint.yaml@main
+
+  call-release-workflow:
+    needs: call-commit-lint-workflow
+    uses: vre-charite-dev/quickstart/.github/workflows/release.yaml@main
+    permissions:
+      contents: write  # Required to create tags, commit changes, etc.
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
